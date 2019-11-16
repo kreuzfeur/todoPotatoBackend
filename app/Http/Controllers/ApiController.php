@@ -43,9 +43,7 @@ class ApiController extends Controller
 	public function respondSuccessCreation($message)
 	{
 		return $this->setStatusCode(201)->respond(
-			[
-				$message
-			]
+			$message
 		);
 	}
 

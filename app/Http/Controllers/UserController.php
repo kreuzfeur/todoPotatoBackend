@@ -20,12 +20,12 @@ class UserController extends ApiController
 	public function login(Request $request)
 	{
 		if (Auth::attempt(['name' => request('name'), 'password' => request('password')])) {
-			$token = Str::random(80);
+			$token = $this->getToken();
 			$user = Auth::user();
 			$user->forceFill([
-				'api_token' =>  Hash::make($token)
+				'api_token' => $token['tokenHash']
 			])->save();
-			return $this->respondSuccessLogin($user, $token);
+			return $this->respondSuccessLogin($user, $token['token']);
 		} else {
 			return $this->respondFaildLogin();
 		}
@@ -44,9 +44,18 @@ class UserController extends ApiController
 		if ($validator->fails()) {
 			return $this->respondInvalidRegistration($validator->errors());
 		}
-		$token = Str::random(80);
-		$user = RegisterController::create($input, $token);
+		$token = $this->getToken();
+		$user = RegisterController::create($input, $token['tokenHash']);
 
-		return $this->respondSuccessRegistration($user, $token);
+		return $this->respondSuccessRegistration($user, $token['token']);
+	}
+
+	private function getToken() {
+		$token = Str::random(80);
+		$tokenHash = hash('sha256', $token);
+		return [
+			'token' => $token,
+			'tokenHash' => $tokenHash,
+		];
 	}
 }

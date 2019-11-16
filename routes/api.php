@@ -25,3 +25,5 @@ Route::resource('/payments', 'PaymentController', [
 		'index', 'store'
 	]
 ]);
+
+Route::resource('todo', 'ToDoController')->middleware('auth:api');
