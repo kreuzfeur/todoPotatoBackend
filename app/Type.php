@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Lawyer extends Model
+class Type extends Model
 {
 	protected $fillable = ['name'];
 
