@@ -59,6 +59,11 @@ class ApiController extends Controller
 		);
 	}
 
+	public function respondFaildLogin($message = 'Invalid email or password')
+	{
+		return $this->setStatusCode(400)->respondWithError($message);
+	}
+
 	public function respondInvalidInput($message = 'Invalid input data')
 	{
 		return $this->setStatusCode(400)->respondWithError($message);
