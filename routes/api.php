@@ -18,7 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('login', 'UserController@login');
-Route::post('register', 'UserController@register');
+Route::post('register', 'UserController@register')->middleware('auth:api');
+Route::get('roles', 'RoleController@index')->middleware('auth:api');
 
 Route::resource('/payments', 'PaymentController', [
 	'only' => [

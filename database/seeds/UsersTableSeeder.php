@@ -24,12 +24,12 @@ class UsersTableSeeder extends Seeder
 		$password = Hash::make('qwerty');
 
 		User::create([
-			'name' => 'admin',
+			'username' => 'admin',
 			'password' => $password,
 			'role_id' => 1
 		]);
 		User::create([
-			'name' => 'user',
+			'username' => 'user',
 			'password' => $password,
 			'role_id' => 2
 		]);
@@ -37,7 +37,7 @@ class UsersTableSeeder extends Seeder
 		$roleIds = DB::table('roles')->select()->pluck('id');
 		for ($i = 0; $i < 10; $i++) {
 			User::create([
-				'name' => $faker->unique()->firstName,
+				'username' => $faker->unique()->firstName,
 				'password' => $password,
 				'role_id' => $faker->randomElement($roleIds)
 			]);

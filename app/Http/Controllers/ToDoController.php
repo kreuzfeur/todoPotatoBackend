@@ -3,11 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\ToDo;
+use App\Transformers\ToDoTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ToDoController extends ApiController
 {
+	protected $todoTransformer;
+	private $_MAX_PER_PAGE = 10;
+
+	function __construct(ToDoTransformer $todoTransformer)
+	{
+		$this->todoTransformer = $todoTransformer;
+	}
+
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -19,10 +28,19 @@ class ToDoController extends ApiController
 		if (!($limit > 0 && $limit <= $this->_MAX_PER_PAGE)) {
 			$limit = $this->_MAX_PER_PAGE;
 		}
+		$user = auth()->user();
+		// admin видит все таски
+		if ($user->role === 'admin') {
+			$todos = ToDo::paginate($limit);
+			return $this->respondWithPagination($todos, [
+				'data' => $this->todoTransformer->transformCollection($todos->all()),
+			]);
+		}
 
-		$todos = ToDo::paginate($limit);
+		// не админ видит только свои
+		$todos = ToDo::where('user_id', $user->id)->paginate($limit);
 		return $this->respondWithPagination($todos, [
-			'data' => $this->paymentTransformer->transformCollection($todos->all()),
+			'data' => $this->todoTransformer->transformCollection($todos->all()),
 		]);
 	}
 
@@ -55,7 +73,7 @@ class ToDoController extends ApiController
 
 		$todo = $user->todos()->create($validator->validated());
 
-		return $this->respondSuccessCreation($todo->toArray());
+		return $this->respondSuccessCreation($this->todoTransformer->transform($todo));
 	}
 
 	/**
@@ -64,16 +82,19 @@ class ToDoController extends ApiController
 	 * @param  \App\ToDo  $toDo
 	 * @return \Illuminate\Http\Response
 	 */
-	public function show(ToDo $toDo)
+	public function show($id)
 	{
-		dd($toDo);
-		// $lesson = Lesson::find($id);
-		// if (!$lesson) {
-		// 	return $this->respondNotFound('Lesson does not exist');
-		// }
-		// return $this->respond([
-		// 	'data' => $this->lessonTransformer->transform($lesson)
-		// ]);
+		$todo = ToDo::find($id);
+		if (!$todo) {
+			return $this->respondNotFound('Запись не найдена');
+		}
+		$user = auth()->user();
+		if ($user->id !== $todo->user_id && $user->role->role !== 'admin') {
+			return $this->respondNotEnoughRights();
+		}
+		return $this->respond([
+			'data' => $this->todoTransformer->transform($todo)
+		]);
 	}
 
 	/**

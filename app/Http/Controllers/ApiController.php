@@ -20,7 +20,7 @@ class ApiController extends Controller
 		return $this;
 	}
 
-	public function respondNotFound($message = 'Not found')
+	public function respondNotFound($message = 'Не найдено')
 	{
 		return $this->setStatusCode(404)->respondWithError($message);
 	}
@@ -30,11 +30,16 @@ class ApiController extends Controller
 		return $this->setStatusCode(401)->respondWithError($message);
 	}
 
-	public function respondSuccessRegistration(User $user, $token)
+	public function respondNotEnoughRights()
+	{
+		return $this->setStatusCode(403)->respondWithError('Недостаточно прав');
+	}
+
+	public function respondSuccessRegistration($user, $token)
 	{
 		return $this->setStatusCode(201)->respond(
 			[
-				'user' => $user->toArray(),
+				'user' => $user,
 				'token' => $token
 			]
 		);
@@ -47,27 +52,27 @@ class ApiController extends Controller
 		);
 	}
 
-	public function respondSuccessLogin(User $user, $token)
+	public function respondSuccessLogin($user, $token)
 	{
 		return $this->setStatusCode(200)->respond(
 			[
-				'user' => $user->toArray(),
+				'user' => $user,
 				'token' => $token
 			]
 		);
 	}
 
-	public function respondFaildLogin($message = 'Invalid email or password')
+	public function respondFaildLogin($message = 'Неверное имя пользователя или пароль')
 	{
 		return $this->setStatusCode(400)->respondWithError($message);
 	}
 
-	public function respondInvalidInput($message = 'Invalid input data')
+	public function respondInvalidInput($message = 'Неверные данные')
 	{
 		return $this->setStatusCode(400)->respondWithError($message);
 	}
 
-	public function respondInternalError($message = 'Internal Error')
+	public function respondInternalError($message = 'Внутренняя ошибка')
 	{
 		return $this->setStatusCode(500)->respondWithError($message);
 	}
@@ -85,13 +90,13 @@ class ApiController extends Controller
 	public function respondCreated()
 	{
 		return $this->setStatusCode(201)->respond([
-			'message' => 'Lesson created'
+			'message' => 'Успешно создано!'
 		]);
 	}
 
-	public function respond($data, $headers = [])
+	public function respond($data, $headers = ['Content-Type' => 'application/json;charset=UTF-8', 'Charset' => 'utf-8'])
 	{
-		return Response::json($data, $this->getStatusCode(), $headers);
+		return Response::json($data, $this->getStatusCode(), $headers, JSON_UNESCAPED_UNICODE);
 	}
 
 	protected function respondWithPagination($collection, $data)
