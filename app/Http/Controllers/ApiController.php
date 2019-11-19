@@ -27,7 +27,7 @@ class ApiController extends Controller
 
 	public function respondInvalidRegistration($message)
 	{
-		return $this->setStatusCode(401)->respondWithError($message);
+		return $this->setStatusCode(400)->respondWithError($message);
 	}
 
 	public function respondNotEnoughRights()

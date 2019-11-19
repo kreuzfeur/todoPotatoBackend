@@ -20,6 +20,22 @@ class UserController extends ApiController
 		$this->userTransformer = $userTransformer;
 	}
 
+	public function index(Request $request) {
+		$limit = (int) $request->get('limit');
+		if (!($limit > 0 && $limit <= $this->_MAX_PER_PAGE)) {
+			$limit = $this->_MAX_PER_PAGE;
+		}
+		$user = auth()->user();
+		if ($user->role->role === 'admin') {
+			$users = User::paginate($limit);
+			return $this->respondWithPagination($users, [
+				// 'data' => $users->all(),
+				'data' => $this->userTransformer->transformCollection($users->all()),
+			]);
+		}
+		return $this->respondNotEnoughRights();
+	}
+
 	/**
 	 * Login user and return the user if successful.
 	 *
@@ -61,7 +77,8 @@ class UserController extends ApiController
 		$token = $this->getToken();
 		$user = RegisterController::create($input, $token['tokenHash']);
 
-		return $this->respondSuccessRegistration($this->userTransformer->transform($user), $token['token']);
+		// вернуть только сообщение об успехе
+		return $this->respondSuccessCreation('Пользователь ' . $user->username . ' успешно создан!');
 	}
 
 	private function getToken()

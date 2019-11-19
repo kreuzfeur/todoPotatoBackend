@@ -8,13 +8,12 @@ class UserTransformer extends Transformer
 {
 	public function transform($user)
 	{
-		// $userArr = $user->toArray();
-		// dd($userArr->role());
+		$userArr = $user->toArray();
 		return [
-			'username' => $user->username,
+			'username' => $user['username'],
 			'role' => $user->role->role,
-			'updated_at' => $user->updated_at,
-			'created_at' => $user->created_at,
+			'updated_at' => $userArr['updated_at'],
+			'created_at' => $userArr['created_at'],
 		];
 	}
 }
