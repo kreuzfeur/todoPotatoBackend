@@ -8,19 +8,21 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class UserController extends ApiController
 {
 	protected $userTransformer;
-	private $_MAX_PER_PAGE = 10;
+	private $_MAX_PER_PAGE = 5;
 
 	function __construct(UserTransformer $userTransformer)
 	{
 		$this->userTransformer = $userTransformer;
 	}
 
-	public function index(Request $request) {
+	public function index(Request $request)
+	{
 		$limit = (int) $request->get('limit');
 		if (!($limit > 0 && $limit <= $this->_MAX_PER_PAGE)) {
 			$limit = $this->_MAX_PER_PAGE;
@@ -30,7 +32,7 @@ class UserController extends ApiController
 			$users = User::paginate($limit);
 			return $this->respondWithPagination($users, [
 				// 'data' => $users->all(),
-				'data' => $this->userTransformer->transformCollection($users->all()),
+				'users' => $this->userTransformer->transformCollection($users->all()),
 			]);
 		}
 		return $this->respondNotEnoughRights();
@@ -79,6 +81,48 @@ class UserController extends ApiController
 
 		// вернуть только сообщение об успехе
 		return $this->respondSuccessCreation('Пользователь ' . $user->username . ' успешно создан!');
+	}
+
+	public function update(Request $request, $id)
+	{
+		$user = auth()->user();
+		if ($user->role->role !== 'admin') {
+			return $this->respondNotEnoughRights();
+		}
+		$validator = Validator::make($request->all(), [
+			'role_id'  => ['exists:roles,id'],
+			'password' => ['string', 'min:6', 'confirmed'],
+		]);
+		if ($validator->fails()) {
+			return $this->respondInvalidRegistration($validator->errors());
+		}
+		$userUpdate = $validator->validated();
+		if($userUpdate['password']) {
+			$userUpdate['password'] = Hash::make($userUpdate['password']);
+		}
+		$updUser = User::find($id);
+		if (!$updUser) {
+			return $this->respondNotFound('Пользователь не найден');
+		}
+		$updUser->update($userUpdate);
+		return $this->setStatusCode(200)->respond(['user' => $updUser]);
+	}
+
+	public function destroy($id)
+	{
+		$user = auth()->user();
+		if ($user->role->role !== 'admin') {
+			return $this->respondNotEnoughRights();
+		}
+		$delUser = User::find($id);
+		if (!$delUser) {
+			return $this->respondNotFound('Пользователь не найден');
+		}
+		if ($delUser->role->role === 'admin') {
+			return $this->setStatusCode(400)->respondWithError('Нельзя удалить пользователя с правами администратора');
+		}
+		User::destroy($id);
+		return $this->setStatusCode(204)->respond('Пользователь удален!');
 	}
 
 	private function getToken()

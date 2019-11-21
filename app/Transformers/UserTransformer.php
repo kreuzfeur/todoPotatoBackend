@@ -10,8 +10,9 @@ class UserTransformer extends Transformer
 	{
 		$userArr = $user->toArray();
 		return [
+			'id' => $user['id'],
 			'username' => $user['username'],
-			'role' => $user->role->role,
+			'role' => $user->role,
 			'updated_at' => $userArr['updated_at'],
 			'created_at' => $userArr['created_at'],
 		];

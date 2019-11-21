@@ -106,6 +106,7 @@ class ToDoController extends ApiController
 	public function edit(ToDo $toDo)
 	{
 		//
+		dd('edit');
 	}
 
 	/**
@@ -118,6 +119,7 @@ class ToDoController extends ApiController
 	public function update(Request $request, ToDo $toDo)
 	{
 		//
+		dd('update');
 	}
 
 	/**

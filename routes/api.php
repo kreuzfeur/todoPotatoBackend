@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('login', 'UserController@login');
 Route::post('register', 'UserController@register')->middleware('auth:api');
+Route::put('user/{id}', 'UserController@update')->middleware('auth:api');
+Route::delete('user/{id}', 'UserController@destroy')->middleware('auth:api');
 Route::get('roles', 'RoleController@index')->middleware('auth:api');
 Route::get('users', 'UserController@index')->middleware('auth:api');
 
