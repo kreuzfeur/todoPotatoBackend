@@ -1,2 +1,2 @@
 <?php
-echo acpache_get_version();
+echo apache_get_version();
