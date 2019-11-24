@@ -97,7 +97,8 @@ class UserController extends ApiController
 			return $this->respondInvalidRegistration($validator->errors());
 		}
 		$userUpdate = $validator->validated();
-		if($userUpdate['password']) {
+		// dd($userUpdate);
+		if(array_key_exists('password', $userUpdate)) {
 			$userUpdate['password'] = Hash::make($userUpdate['password']);
 		}
 		$updUser = User::find($id);
@@ -105,7 +106,7 @@ class UserController extends ApiController
 			return $this->respondNotFound('Пользователь не найден');
 		}
 		$updUser->update($userUpdate);
-		return $this->setStatusCode(200)->respond(['user' => $updUser]);
+		return $this->setStatusCode(200)->respond(['user' => $this->userTransformer->transform($updUser)]);
 	}
 
 	public function destroy($id)
@@ -118,11 +119,11 @@ class UserController extends ApiController
 		if (!$delUser) {
 			return $this->respondNotFound('Пользователь не найден');
 		}
-		if ($delUser->role->role === 'admin') {
-			return $this->setStatusCode(400)->respondWithError('Нельзя удалить пользователя с правами администратора');
+		if ($delUser->role->username === 'admin') {
+			return $this->setStatusCode(400)->respondWithError('Нельзя удалить администратора');
 		}
 		User::destroy($id);
-		return $this->setStatusCode(204)->respond('Пользователь удален!');
+		return $this->setStatusCode(200)->respond('Пользователь ' . $delUser->username . ' удален!');
 	}
 
 	private function getToken()
