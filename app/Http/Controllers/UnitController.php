@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Transformers\UnitTransformer;
 use App\Unit;
 use Illuminate\Http\Request;
 
-class UnitController extends Controller
+class UnitController extends ApiController
 {
+	protected $unitTransformer;
+	private $_MAX_PER_PAGE = 5;
+
+	function __construct(UnitTransformer $unitTransformer)
+	{
+		$this->unitTransformer = $unitTransformer;
+	}
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -14,7 +22,7 @@ class UnitController extends Controller
 	 */
 	public function index()
 	{
-		//
+		return $this->respond($this->unitTransformer->transformCollection(Unit::all()->toArray()));
 	}
 
 	/**

@@ -6,13 +6,13 @@ class UnitTransformer extends Transformer
 {
 	public function transform($unit)
 	{
-		$unitArr = $unit->toArray();
+		// $unitArr = $unit->toArray();
 		// dd($todoArr);
 		return [
-			'id' => $unitArr['id'],
-			'name' => $unitArr['name'],
-			'short_name' => $unitArr['short_name'],
-			'type' => $unitArr['type'],
+			'id' => $unit['id'],
+			'name' => $unit['name'],
+			'short_name' => $unit['short_name'],
+			'type' => $unit['type'],
 		];
 	}
 }

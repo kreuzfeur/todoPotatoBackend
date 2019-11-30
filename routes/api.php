@@ -40,6 +40,9 @@ Route::resource('todo', 'ToDoController', [
 Route::get('todo-templates', 'TodoTemplateController@index')->middleware('auth:api');
 Route::post('todo-templates', 'TodoTemplateController@store')->middleware('auth:api');
 
+//units
+Route::get('units', 'UnitController@index')->middleware('auth:api');
+
 // for lawyers payment
 Route::resource('/payments', 'PaymentController', [
 	'only' => ['index', 'store']
