@@ -14,20 +14,41 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+	return $request->user();
 });
 
+// auth
 Route::post('login', 'UserController@login');
 Route::post('register', 'UserController@register')->middleware('auth:api');
+
+// users
+Route::get('users', 'UserController@index')->middleware('auth:api');
 Route::put('users/{id}', 'UserController@update')->middleware('auth:api');
 Route::delete('users/{id}', 'UserController@destroy')->middleware('auth:api');
-Route::get('roles', 'RoleController@index')->middleware('auth:api');
-Route::get('users', 'UserController@index')->middleware('auth:api');
 
-Route::resource('/payments', 'PaymentController', [
+// roles
+Route::get('roles', 'RoleController@index')->middleware('auth:api');
+
+// todo
+Route::resource('todo', 'ToDoController', [
 	'only' => [
 		'index', 'store'
 	]
+])->middleware('auth:api');
+
+//todo templates
+Route::get('todo-templates', 'TodoTemplateController@index')->middleware('auth:api');
+Route::post('todo-templates', 'TodoTemplateController@store')->middleware('auth:api');
+
+// for lawyers payment
+Route::resource('/payments', 'PaymentController', [
+	'only' => ['index', 'store']
 ]);
 
-Route::resource('todo', 'ToDoController')->middleware('auth:api');
+
+// 404
+Route::fallback(function () {
+	return response()->json([
+		'error' => ['message' => 'Not Found.']
+	], 404);
+});

@@ -17,6 +17,8 @@ class RolesTableSeeder extends Seeder
 		$faker = \Faker\Factory::create();
 
 		DB::table('roles')->insert(['role' => 'admin']);
-		DB::table('roles')->insert(['role' => 'user']);
+		DB::table('roles')->insert(['role' => 'chief_accountant']);
+		DB::table('roles')->insert(['role' => 'worker']);
+		DB::table('roles')->insert(['role' => 'manager']);
 	}
 }

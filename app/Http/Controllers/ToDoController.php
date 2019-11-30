@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\ToDo;
+use App\Todo;
 use App\Transformers\ToDoTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -29,29 +29,25 @@ class ToDoController extends ApiController
 			$limit = $this->_MAX_PER_PAGE;
 		}
 		$user = auth()->user();
+		$userRole = $user->role->role;
+
+		// $from = date('2018-01-01');
+		// $to = date('2018-05-02');
+		// Reservation::whereBetween('reservation_from', [$from, $to])->get();
+
 		// admin видит все таски
-		if ($user->role === 'admin') {
-			$todos = ToDo::paginate($limit);
+		if ($userRole === 'admin' || $userRole === 'chief_accountant') {
+			$todos = Todo::paginate($limit);
 			return $this->respondWithPagination($todos, [
 				'data' => $this->todoTransformer->transformCollection($todos->all()),
 			]);
 		}
 
 		// не админ видит только свои
-		$todos = ToDo::where('user_id', $user->id)->paginate($limit);
+		$todos = Todo::where('doer_user_id', $user->id)->paginate($limit);
 		return $this->respondWithPagination($todos, [
 			'data' => $this->todoTransformer->transformCollection($todos->all()),
 		]);
-	}
-
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function create()
-	{
-		//
 	}
 
 	/**
@@ -63,15 +59,28 @@ class ToDoController extends ApiController
 	public function store(Request $request)
 	{
 		$validator = Validator::make($request->all(), [
-			'todo' => ['required', 'string', 'max:255', 'min: 1']
+			// 'todo' => ['required', 'string', 'max:255', 'min: 1']
+			'volume' => ['required', 'between:0,99999999'],
+			'unit_id' => ['required', 'exists:units,id'],
+			'todo_template_id' => ['required', 'exists:todo_templates,id'],
+			'additional_info' => ['string', 'max:255', 'min: 1'],
+			// 'creater_user_id' => ['exists:users,id'],
+			'doer_user_id' => ['exists:users,id'],
 		]);
 
 		if ($validator->fails()) {
 			return $this->respondInvalidInput($validator->errors()->toArray());
 		}
+		// dd($validator->validated());
 		$user = auth()->user();
 
-		$todo = $user->todos()->create($validator->validated());
+		$userRole = $user->role->role;
+		if ($userRole === 'worker' || $userRole === 'manager') { }
+
+		$todo = Todo::create(array_merge(
+			$validator->validated(),
+			['creater_user_id' => $user->id]
+		));
 
 		return $this->respondSuccessCreation($this->todoTransformer->transform($todo));
 	}
@@ -79,12 +88,12 @@ class ToDoController extends ApiController
 	/**
 	 * Display the specified resource.
 	 *
-	 * @param  \App\ToDo  $toDo
+	 * @param  \App\Todo  $toDo
 	 * @return \Illuminate\Http\Response
 	 */
 	public function show($id)
 	{
-		$todo = ToDo::find($id);
+		$todo = Todo::find($id);
 		if (!$todo) {
 			return $this->respondNotFound('Запись не найдена');
 		}
@@ -98,25 +107,13 @@ class ToDoController extends ApiController
 	}
 
 	/**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  \App\ToDo  $toDo
-	 * @return \Illuminate\Http\Response
-	 */
-	public function edit(ToDo $toDo)
-	{
-		//
-		dd('edit');
-	}
-
-	/**
 	 * Update the specified resource in storage.
 	 *
 	 * @param  \Illuminate\Http\Request  $request
-	 * @param  \App\ToDo  $toDo
+	 * @param  \App\Todo  $toDo
 	 * @return \Illuminate\Http\Response
 	 */
-	public function update(Request $request, ToDo $toDo)
+	public function update(Request $request, Todo $toDo)
 	{
 		//
 		dd('update');
@@ -125,10 +122,10 @@ class ToDoController extends ApiController
 	/**
 	 * Remove the specified resource from storage.
 	 *
-	 * @param  \App\ToDo  $toDo
+	 * @param  \App\Todo  $toDo
 	 * @return \Illuminate\Http\Response
 	 */
-	public function destroy(ToDo $toDo)
+	public function destroy(Todo $toDo)
 	{
 		//
 	}

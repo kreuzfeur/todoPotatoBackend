@@ -13,8 +13,8 @@ class UserTransformer extends Transformer
 			'id' => $user['id'],
 			'username' => $user['username'],
 			'role' => $user->role,
-			'updated_at' => $userArr['updated_at'],
-			'created_at' => $userArr['created_at'],
+			// 'updated_at' => $userArr['updated_at'],
+			// 'created_at' => $userArr['created_at'],
 		];
 	}
 }

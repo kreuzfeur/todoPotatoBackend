@@ -26,12 +26,13 @@ class UsersTableSeeder extends Seeder
 		User::create([
 			'username' => 'admin',
 			'password' => $password,
-			'role_id' => 1
+			'role_id' => 1,
+			'api_token' => 'RF6cZNHKSxAVqRhzAN6zRfPsPpmlyaPUq77xdfflKM9orpVFMwbHA3MmgaUcnN7Ou4W9VYfmkVKeBBp1'
 		]);
 		User::create([
 			'username' => 'user',
 			'password' => $password,
-			'role_id' => 2
+			'role_id' => 2,
 		]);
 
 		$roleIds = DB::table('roles')->select()->pluck('id');
@@ -39,7 +40,7 @@ class UsersTableSeeder extends Seeder
 			User::create([
 				'username' => $faker->unique()->firstName,
 				'password' => $password,
-				'role_id' => $faker->randomElement($roleIds)
+				'role_id' => $faker->randomElement($roleIds),
 			]);
 		}
 	}

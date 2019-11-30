@@ -39,7 +39,7 @@ class User extends Authenticatable
 
 	public function todos()
 	{
-		return $this->hasMany(ToDo::class);
+		return $this->hasMany(Todo::class);
 	}
 
 	public function role()

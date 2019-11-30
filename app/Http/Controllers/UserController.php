@@ -23,13 +23,19 @@ class UserController extends ApiController
 
 	public function index(Request $request)
 	{
+		$validator = Validator::make($request->all(), [
+			'role_id'  => ['exists:roles,id'],
+		]);
+		if ($validator->fails()) {
+			return $this->respondInvalidInput($validator->errors());
+		}
 		$limit = (int) $request->get('limit');
 		if (!($limit > 0 && $limit <= $this->_MAX_PER_PAGE)) {
 			$limit = $this->_MAX_PER_PAGE;
 		}
 		$user = auth()->user();
-		if ($user->role->role === 'admin') {
-			$users = User::paginate($limit);
+		if ($user->role->role === 'admin' || $user->role->role === 'chief_accountant') {
+			$users = $request->role_id ? User::where('role_id', $request->role_id)->paginate($limit) : User::paginate($limit);
 			return $this->respondWithPagination($users, [
 				// 'data' => $users->all(),
 				'users' => $this->userTransformer->transformCollection($users->all()),
